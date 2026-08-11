@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ playlist.name }} - Lyrical</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(180deg, #1e1e2f 0%, #121212 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: white;
+            padding: 40px 20px;
+        }
+        .container { max-width: 700px; margin: 0 auto; }
+        h1 { color: #1db954; font-size: 30px; margin-bottom: 15px; }
+        h2 { color: #b3b3b3; margin-top: 40px; margin-bottom: 15px; font-size: 18px; }
+        a { color: #1db954; text-decoration: none; font-weight: 600; }
+        a:hover { text-decoration: underline; }
+        .back-link { display: inline-block; margin-bottom: 10px; font-size: 14px; }
+        .song-card {
+            background: #181818;
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .song-card:hover { background: #232323; transform: translateY(-2px); }
+        .song-info { font-size: 15px; }
+        .song-info span { color: #1db954; }
+        .song-card button {
+            padding: 8px 18px;
+            border-radius: 20px;
+            border: none;
+            background: #1db954;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .song-card button:hover { background: #1ed760; transform: scale(1.05); }
+        .remove-btn { background: #e22134 !important; }
+        .remove-btn:hover { background: #ff3b4e !important; }
+        .empty-msg { color: #b3b3b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 {{ playlist.name }}</h1>
+        <a href="{% url 'playlists' %}" class="back-link">← Back to Playlists</a>
+
+        <h2>Songs in this playlist</h2>
+        {% for song in playlist.songs.all %}
+            <div class="song-card">
+                <div class="song-info">{{ song.title }} — <span>{{ song.artist }}</span></div>
+                <form method="POST" action="{% url 'remove_song' playlist.id song.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="remove-btn">Remove</button>
+                </form>
+            </div>
+        {% empty %}
+            <p class="empty-msg">Is playlist mein abhi koi song nahi hai.</p>
+        {% endfor %}
+
+       <h2>Add a song</h2>
+{% for song in all_songs %}
+    <div class="song-card">
+        <div class="song-info">{{ song.title }} — <span>{{ song.artist }}</span></div>
+        <form method="POST" action="{% url 'add_song' playlist.id song.id %}">
+            {% csrf_token %}
+            <button type="submit">Add</button>
+        </form>
+    </div>
+{% endfor %}
+    </div>
+</body>
+</html>

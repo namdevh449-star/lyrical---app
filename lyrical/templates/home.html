@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lyrical</title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        background: linear-gradient(180deg, #1e1e2f 0%, #121212 100%);
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: #ffffff;
+        min-height: 100vh;
+        padding: 40px 20px;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    h1 {
+        font-size: 32px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-size: 14px;
+    }
+
+    .user-info p {
+        color: #b3b3b3;
+    }
+
+    .user-info a {
+        color: #1db954;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+
+    .user-info a:hover {
+        color: #1ed760;
+        text-decoration: underline;
+    }
+
+    .search-form {
+        display: flex;
+        gap: 10px;
+        margin: 30px 0;
+    }
+
+    .search-form input {
+        flex: 1;
+        padding: 12px 16px;
+        border-radius: 25px;
+        border: 1px solid #333;
+        background: #282828;
+        color: white;
+        font-size: 14px;
+        outline: none;
+        transition: border 0.2s;
+    }
+
+    .search-form input:focus {
+        border: 1px solid #1db954;
+    }
+
+    .search-form button {
+        padding: 12px 28px;
+        border-radius: 25px;
+        border: none;
+        background: #1db954;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s, transform 0.1s;
+    }
+
+    .search-form button:hover {
+        background: #1ed760;
+        transform: scale(1.03);
+    }
+
+    .song-list {
+        list-style: none;
+    }
+
+    .song-card {
+        background: #181818;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        transition: background 0.2s, transform 0.15s;
+    }
+
+    .song-card:hover {
+        background: #232323;
+        transform: translateY(-2px);
+    }
+
+    .song-title {
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 3px;
+    }
+
+    .song-artist {
+        color: #1db954;
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    audio {
+        width: 100%;
+        height: 36px;
+    }
+
+    .no-results {
+        color: #b3b3b3;
+        margin-top: 20px;
+        font-size: 15px;
+    }
+
+    .lyrics-toggle {
+        color: #1db954;
+        font-size: 13px;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 8px;
+        margin-left: 12px;
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-family: inherit;
+    }
+
+    .lyrics-box {
+        display: none;
+        margin-top: 12px;
+        padding: 15px;
+        background: #0f0f0f;
+        border-radius: 8px;
+        max-height: 150px;
+        overflow-y: auto;
+    }
+
+    .lyrics-box.active {
+        display: block;
+    }
+
+    .lyrics-line {
+        color: #666;
+        font-size: 14px;
+        padding: 4px 0;
+        transition: color 0.3s, font-weight 0.3s;
+    }
+
+    .lyrics-line.current {
+        color: #1db954;
+        font-weight: bold;
+        font-size: 16px;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-row">
+        <h1>🎵 Lyrical</h1>
+        <div class="user-info">
+            {% if user.is_authenticated %}
+    <p>Welcome, {{ user.username }}</p>
+    <a href="{% url 'logout' %}">Logout</a>
+    <a href="{% url 'playlists' %}">My Playlists</a>
+    <a href="{% url 'library' %}">Library</a>
+    <a href="{% url 'history' %}">History</a>
+    <a href="{% url 'analytics' %}">📊 Analytics</a>
+{% else %}
+                <a href="{% url 'login' %}">Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <form method="GET" action="{% url 'home' %}" class="search-form">
+        <input type="text" name="q" placeholder="Search songs or artists..." value="{{ query }}">
+        <button type="submit">Search</button>
+    </form>
+        <ul class="song-list">
+            {% for song in songs %}
+                <li class="song-card">
+    <div class="song-title">{{ song.title }}</div>
+    <div class="song-artist">{{ song.artist }}</div>
+    <audio controls data-song-id="{{ song.id }}">
+        <source src="{{ song.audio_file.url }}" type="video/mp4">
+        Your browser does not support the audio element.
+    </audio>
+    <a href="{% url 'toggle_like' song.id %}" style="color:#1db954; font-size:13px; text-decoration:none; display:inline-block; margin-top:8px;">Like</a>
+    {% if song.lyrics %}
+        <button type="button" class="lyrics-toggle" onclick="toggleLyrics({{ song.id }})">Lyrics</button>
+        <textarea id="lrc-data-{{ song.id }}" style="display:none;">{{ song.lyrics }}</textarea>
+        <div class="lyrics-box" id="lyrics-box-{{ song.id }}"></div>
+    {% endif %}
+</li>
+                {% empty %}
+        <p style="color:#b3b3b3; margin-top:20px;">Koi song nahi mila. Kuch aur try karein.</p>
+            {% endfor %}
+       </ul>
+    </div>
+
+    <script>
+    function parseLRC(text) {
+        const lines = text.trim().split('\n');
+        const parsed = [];
+        lines.forEach(line => {
+            const match = line.match(/\[(\d{2}):(\d{2}\.\d{2})\](.*)/);
+            if (match) {
+                const minutes = parseInt(match[1]);
+                const seconds = parseFloat(match[2]);
+                const time = minutes * 60 + seconds;
+                parsed.push({ time: time, text: match[3].trim() });
+            }
+        });
+        return parsed;
+    }
+
+    function toggleLyrics(songId) {
+        const box = document.getElementById('lyrics-box-' + songId);
+        box.classList.toggle('active');
+        if (box.classList.contains('active') && !box.dataset.loaded) {
+            const rawText = document.getElementById('lrc-data-' + songId).value;
+            const parsed = parseLRC(rawText);
+            parsed.forEach((line, index) => {
+                const p = document.createElement('p');
+                p.className = 'lyrics-line';
+                p.id = 'lyrics-line-' + songId + '-' + index;
+                p.textContent = line.text;
+                box.appendChild(p);
+            });
+            box.dataset.loaded = 'true';
+            box.dataset.lyrics = JSON.stringify(parsed);
+        }
+    }
+
+    document.querySelectorAll('audio').forEach(function(audio) {
+        audio.addEventListener('play', function() {
+            const songId = this.dataset.songId;
+            fetch(`/play/${songId}/`);
+        });
+
+        audio.addEventListener('timeupdate', function() {
+            const songId = this.dataset.songId;
+            const box = document.getElementById('lyrics-box-' + songId);
+            if (!box || !box.dataset.lyrics) return;
+
+            const lyrics = JSON.parse(box.dataset.lyrics);
+            const currentTime = this.currentTime;
+
+            let activeIndex = -1;
+            for (let i = 0; i < lyrics.length; i++) {
+                if (currentTime >= lyrics[i].time) {
+                    activeIndex = i;
+                }
+            }
+
+            document.querySelectorAll('[id^="lyrics-line-' + songId + '-"]').forEach(el => {
+                el.classList.remove('current');
+            });
+
+            if (activeIndex >= 0) {
+                const activeLine = document.getElementById('lyrics-line-' + songId + '-' + activeIndex);
+                if (activeLine) {
+                    activeLine.classList.add('current');
+                    activeLine.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
+            }
+        });
+    });
+    </script>
+</body>
+</html>

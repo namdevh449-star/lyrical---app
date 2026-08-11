@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login - Lyrical</title>
+    <style>
+        body {
+            background: #121212;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .form-box {
+            background: #181818;
+            padding: 40px;
+            border-radius: 10px;
+            width: 300px;
+        }
+        h2 { color: #1db954; margin-bottom: 20px; }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border: none;
+            background: #282828;
+            color: white;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background: #1db954;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .error { color: #ff4d4d; margin-bottom: 10px; }
+        a { color: #1db954; }
+    </style>
+</head>
+<body>
+    <div class="form-box">
+        <h2>Login</h2>
+        {% if messages %}
+            {% for message in messages %}
+                <p class="error">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+        <form method="POST">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <p>Don't have an account? <a href="/signup/">Sign Up</a></p>
+    </div>
+</body>
+</html>

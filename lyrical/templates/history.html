@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lyrical - History</title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        background: linear-gradient(180deg, #1e1e2f 0%, #121212 100%);
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: #ffffff;
+        min-height: 100vh;
+        padding: 40px 20px;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    h1 {
+        font-size: 32px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-size: 14px;
+    }
+    .user-info p {
+        color: #b3b3b3;
+    }
+    .user-info a {
+        color: #1db954;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+    .user-info a:hover {
+        color: #1ed760;
+        text-decoration: underline;
+    }
+    .history-list {
+        list-style: none;
+        margin-top: 20px;
+    }
+    .history-card {
+        background: #181818;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background 0.2s, transform 0.15s;
+    }
+    .history-card:hover {
+        background: #232323;
+        transform: translateY(-2px);
+    }
+    .song-title {
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 3px;
+    }
+    .song-artist {
+        color: #1db954;
+        font-size: 13px;
+    }
+    .played-time {
+        color: #b3b3b3;
+        font-size: 12px;
+        white-space: nowrap;
+    }
+    .empty-msg {
+        color: #b3b3b3;
+        font-size: 15px;
+        margin-top: 20px;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-row">
+            <h1>Recently Played</h1>
+            <div class="user-info">
+                <p>Welcome, {{ user.username }}</p>
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'logout' %}">Logout</a>
+            </div>
+        </div>
+
+        <ul class="history-list">
+            {% for entry in history %}
+                <li class="history-card">
+                    <div>
+                        <div class="song-title">{{ entry.song.title }}</div>
+                        <div class="song-artist">{{ entry.song.artist }}</div>
+                    </div>
+                    <div class="played-time">{{ entry.played_at|timesince }} ago</div>
+                </li>
+            {% empty %}
+                <p class="empty-msg">Abhi tak koi song play nahi kiya.</p>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

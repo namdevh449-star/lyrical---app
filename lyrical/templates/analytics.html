@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<head>
+    <title>Analytics Dashboard</title>
+</head>
+<body>
+   <h2>Analytics Dashboard</h2>
+
+    <a href="{% url 'export_analytics_csv' %}">
+        <button>⬇️ Export CSV</button>
+    </a>
+
+    <div class="stats">
+        <p>Total Songs: {{ total_songs }}</p>
+        <p>Total Plays: {{ total_plays }}</p>
+        <p>Total Playlists: {{ total_playlists }}</p>
+    </div>
+<h3>Songs Play Count (Chart)</h3>
+<canvas id="songsChart" width="400" height="200"></canvas>
+    <h3>Top Songs</h3>
+    <ul>
+        {% for song in top_songs %}
+            <li>{{ song.title }} - {{ song.artist }} ({{ song.play_count }} plays)</li>
+        {% endfor %}
+    </ul>
+<h3>Mood-wise Songs (Chart)</h3>
+<canvas id="moodChart" width="400" height="200"></canvas>
+<h3>Artists Play Count (Chart)</h3>
+<canvas id="artistsChart" width="400" height="200"></canvas>
+    <h3>Top Artists</h3>
+    <ul>
+        {% for artist in top_artists %}
+            <li>{{ artist.artist }} ({{ artist.total_plays }} plays)</li>
+        {% endfor %}
+    </ul>
+    <script>
+    // Top Songs Bar Chart
+    const songLabels = [{% for song in top_songs %}"{{ song.title }}",{% endfor %}];
+    const songData = [{% for song in top_songs %}{{ song.play_count }},{% endfor %}];
+
+    new Chart(document.getElementById('songsChart'), {
+        type: 'bar',
+        data: {
+            labels: songLabels,
+            datasets: [{
+                label: 'Plays',
+                data: songData,
+                backgroundColor: '#1db954'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } }
+        }
+    });
+
+    // Top Artists Pie Chart
+    const artistLabels = [{% for artist in top_artists %}"{{ artist.artist }}",{% endfor %}];
+    const artistData = [{% for artist in top_artists %}{{ artist.total_plays }},{% endfor %}];
+
+    new Chart(document.getElementById('artistsChart'), {
+        type: 'pie',
+        data: {
+            labels: artistLabels,
+            datasets: [{
+                data: artistData,
+                backgroundColor: ['#1db954', '#1ed760', '#ff6b6b', '#4dabf7', '#ffd43b', '#ae3ec9', '#f76707']
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+    // Mood Distribution Chart
+    const moodLabels = [{% for m in mood_data %}"{{ m.mood }}",{% endfor %}];
+    const moodCounts = [{% for m in mood_data %}{{ m.count }},{% endfor %}];
+
+    new Chart(document.getElementById('moodChart'), {
+        type: 'pie',
+        data: {
+            labels: moodLabels,
+            datasets: [{
+                data: moodCounts,
+                backgroundColor: ['#1db954', '#ff6b6b', '#4dabf7', '#ffd43b', '#ae3ec9', '#f76707']
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+</script>
+</body>
+</html>

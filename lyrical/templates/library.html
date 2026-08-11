@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lyrical - Library</title>
+    <style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        background: linear-gradient(180deg, #1e1e2f 0%, #121212 100%);
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: #ffffff;
+        min-height: 100vh;
+        padding: 40px 20px;
+    }
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    .header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    h1 {
+        font-size: 32px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    h2 {
+        font-size: 20px;
+        margin: 30px 0 15px 0;
+        color: #ffffff;
+    }
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        font-size: 14px;
+    }
+    .user-info p {
+        color: #b3b3b3;
+    }
+    .user-info a {
+        color: #1db954;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+    .user-info a:hover {
+        color: #1ed760;
+        text-decoration: underline;
+    }
+    .song-list, .playlist-list {
+        list-style: none;
+    }
+    .song-card {
+        background: #181818;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background 0.2s, transform 0.15s;
+    }
+    .song-card:hover {
+        background: #232323;
+        transform: translateY(-2px);
+    }
+    .song-title {
+        font-size: 17px;
+        font-weight: 600;
+        margin-bottom: 3px;
+    }
+    .song-artist {
+        color: #1db954;
+        font-size: 13px;
+    }
+    .unlike-btn {
+        color: #ff4d4d;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 13px;
+        padding: 6px 14px;
+        border: 1px solid #ff4d4d;
+        border-radius: 20px;
+        transition: background 0.2s, color 0.2s;
+        white-space: nowrap;
+    }
+    .unlike-btn:hover {
+        background: #ff4d4d;
+        color: #ffffff;
+    }
+    .playlist-card {
+        background: #181818;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        transition: background 0.2s, transform 0.15s;
+    }
+    .playlist-card:hover {
+        background: #232323;
+        transform: translateY(-2px);
+    }
+    .playlist-card a {
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 17px;
+        font-weight: 600;
+    }
+    .empty-msg {
+        color: #b3b3b3;
+        font-size: 15px;
+        margin-bottom: 20px;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-row">
+            <h1>Your Library</h1>
+            <div class="user-info">
+                <p>Welcome, {{ user.username }}</p>
+                <a href="{% url 'home' %}">Home</a>
+                <a href="{% url 'logout' %}">Logout</a>
+            </div>
+        </div>
+
+        <h2>Liked Songs</h2>
+        <ul class="song-list">
+            {% for like in liked_songs %}
+                <li class="song-card">
+                    <div>
+                        <div class="song-title">{{ like.song.title }}</div>
+                        <div class="song-artist">{{ like.song.artist }}</div>
+                    </div>
+                    <a href="{% url 'toggle_like' like.song.id %}" class="unlike-btn">Unlike</a>
+                </li>
+            {% empty %}
+                <p class="empty-msg">Abhi tak koi song like nahi kiya.</p>
+            {% endfor %}
+        </ul>
+
+        <h2>Your Playlists</h2>
+        <ul class="playlist-list">
+            {% for playlist in playlists %}
+                <li class="playlist-card">
+                    <a href="{% url 'playlist_detail' playlist.id %}">{{ playlist.name }}</a>
+                </li>
+            {% empty %}
+                <p class="empty-msg">Koi playlist nahi bani abhi tak.</p>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

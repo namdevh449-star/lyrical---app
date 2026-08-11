@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Lyrics Timing Tool</title>
+    <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+        background: linear-gradient(180deg, #1e1e2f 0%, #121212 100%);
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: #ffffff;
+        min-height: 100vh;
+        padding: 40px 20px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 26px; margin-bottom: 5px; }
+    .subtitle { color: #b3b3b3; font-size: 14px; margin-bottom: 25px; }
+    .card {
+        background: #181818;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+    label { display: block; margin-bottom: 8px; color: #b3b3b3; font-size: 13px; }
+    select, textarea {
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #333;
+        background: #282828;
+        color: white;
+        font-size: 14px;
+        margin-bottom: 15px;
+        font-family: inherit;
+    }
+    textarea { min-height: 150px; resize: vertical; }
+    audio { width: 100%; margin-bottom: 15px; }
+    button {
+        padding: 10px 24px;
+        border-radius: 20px;
+        border: none;
+        background: #1db954;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 14px;
+        margin-right: 10px;
+    }
+    button:hover { background: #1ed760; }
+    button:disabled { background: #444; cursor: not-allowed; }
+    .current-line-box {
+        background: #0f0f0f;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        font-size: 20px;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        color: #1db954;
+        font-weight: 600;
+    }
+    .progress-text { color: #b3b3b3; font-size: 13px; margin-bottom: 15px; }
+    .output-box {
+        width: 100%;
+        min-height: 200px;
+        background: #0f0f0f;
+        color: #1db954;
+        border: 1px solid #333;
+        border-radius: 6px;
+        padding: 15px;
+        font-family: monospace;
+        font-size: 13px;
+    }
+    a { color: #1db954; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Lyrics Timing Tool</h1>
+        <p class="subtitle"><a href="/">← Home</a> — Song play karo, har line pe Tag dabao, exact LRC milega</p>
+
+        <div class="card">
+            <label>1. Song select karo</label>
+            <select id="songSelect">
+                <option value="">-- Song chuno --</option>
+                {% for song in songs %}
+                    <option value="{{ song.audio_file.url }}">{{ song.title }} - {{ song.artist }}</option>
+                {% endfor %}
+            </select>
+
+            <audio id="player" controls></audio>
+
+            <label>2. Plain lyrics paste karo (ek line per row, bina time ke)</label>
+            <textarea id="lyricsInput" placeholder="Pehli line&#10;Doosri line&#10;Teesri line..."></textarea>
+
+            <button id="startBtn">Start Tagging</button>
+        </div>
+
+        <div class="card" id="taggingCard" style="display:none;">
+            <p class="progress-text" id="progressText">Line 1 of 10</p>
+            <div class="current-line-box" id="currentLine">-</div>
+            <button id="tagBtn">Tag This Line (or press Enter)</button>
+            <button id="skipBtn" style="background:#555;">Skip Line</button>
+        </div>
+
+        <div class="card" id="outputCard" style="display:none;">
+            <label>3. Ye LRC text copy karo aur admin panel mein paste karo</label>
+            <textarea class="output-box" id="outputBox" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        const songSelect = document.getElementById('songSelect');
+        const player = document.getElementById('player');
+        const lyricsInput = document.getElementById('lyricsInput');
+        const startBtn = document.getElementById('startBtn');
+        const taggingCard = document.getElementById('taggingCard');
+        const outputCard = document.getElementById('outputCard');
+        const progressText = document.getElementById('progressText');
+        const currentLineBox = document.getElementById('currentLine');
+        const tagBtn = document.getElementById('tagBtn');
+        const skipBtn = document.getElementById('skipBtn');
+        const outputBox = document.getElementById('outputBox');
+
+        let lines = [];
+        let currentIndex = 0;
+        let results = [];
+
+        songSelect.addEventListener('change', function() {
+            if (this.value) {
+                player.src = this.value;
+            }
+        });
+
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60);
+            const s = (seconds % 60).toFixed(2);
+            return String(m).padStart(2, '0') + ':' + (s < 10 ? '0' + s : s);
+        }
+
+        function showCurrentLine() {
+            if (currentIndex >= lines.length) {
+                finishTagging();
+                return;
+            }
+            progressText.textContent = `Line ${currentIndex + 1} of ${lines.length}`;
+            currentLineBox.textContent = lines[currentIndex];
+        }
+
+        function tagLine() {
+            if (currentIndex >= lines.length) return;
+            const time = player.currentTime;
+            results.push(`[${formatTime(time)}]${lines[currentIndex]}`);
+            currentIndex++;
+            showCurrentLine();
+        }
+
+        function skipLine() {
+            if (currentIndex >= lines.length) return;
+            currentIndex++;
+            showCurrentLine();
+        }
+
+        function finishTagging() {
+            taggingCard.style.display = 'none';
+            outputCard.style.display = 'block';
+            outputBox.value = results.join('\n');
+        }
+
+        startBtn.addEventListener('click', function() {
+            if (!player.src) {
+                alert('Pehle koi song select karo');
+                return;
+            }
+            const rawLines = lyricsInput.value.trim().split('\n').filter(l => l.trim() !== '');
+            if (rawLines.length === 0) {
+                alert('Lyrics paste karo pehle');
+                return;
+            }
+            lines = rawLines;
+            currentIndex = 0;
+            results = [];
+            taggingCard.style.display = 'block';
+            outputCard.style.display = 'none';
+            showCurrentLine();
+            player.play();
+        });
+
+        tagBtn.addEventListener('click', tagLine);
+        skipBtn.addEventListener('click', skipLine);
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && taggingCard.style.display === 'block') {
+                e.preventDefault();
+                tagLine();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Playlists - Lyrical</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(180deg, #1e1e2f 0%, #121212 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            color: white;
+            padding: 40px 20px;
+        }
+        .container { max-width: 700px; margin: 0 auto; }
+        h1 { color: #1db954; font-size: 30px; margin-bottom: 15px; }
+        a { color: #1db954; text-decoration: none; font-weight: 600; }
+        a:hover { text-decoration: underline; }
+        .back-link { display: inline-block; margin-bottom: 25px; font-size: 14px; }
+        .create-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 25px;
+            border: 1px solid #333;
+            background: #282828;
+            color: white;
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        input[type="text"]:focus { border: 1px solid #1db954; }
+        button {
+            padding: 12px 28px;
+            border-radius: 25px;
+            border: none;
+            background: #1db954;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+        button:hover { background: #1ed760; transform: scale(1.03); }
+        .playlist-card {
+            background: #181818;
+            padding: 18px 22px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .playlist-card:hover { background: #232323; transform: translateY(-2px); }
+        .playlist-name { font-size: 16px; font-weight: 600; }
+        .song-count { color: #b3b3b3; font-size: 13px; margin-top: 3px; }
+        .empty-msg { color: #b3b3b3; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 My Playlists</h1>
+        <a href="{% url 'home' %}" class="back-link">← Back to Home</a>
+
+        <form method="POST" action="{% url 'create_playlist' %}" class="create-form">
+            {% csrf_token %}
+            <input type="text" name="name" placeholder="New playlist name" required>
+            <button type="submit">Create</button>
+        </form>
+
+        {% for playlist in playlists %}
+            <div class="playlist-card">
+                <div>
+                    <div class="playlist-name">{{ playlist.name }}</div>
+                    <div class="song-count">{{ playlist.songs.count }} songs</div>
+                </div>
+                <a href="{% url 'playlist_detail' playlist.id %}">Open →</a>
+            </div>
+        {% empty %}
+            <p class="empty-msg">Aapne abhi tak koi playlist nahi banayi.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>
