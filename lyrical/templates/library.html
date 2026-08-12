@@ -135,12 +135,18 @@
         <h2>Liked Songs</h2>
         <ul class="song-list">
             {% for like in liked_songs %}
-                <li class="song-card">
-                    <div>
-                        <div class="song-title">{{ like.song.title }}</div>
-                        <div class="song-artist">{{ like.song.artist }}</div>
+                <li class="song-card" style="flex-direction:column; align-items:flex-start; gap:10px;">
+                    <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div class="song-title">{{ like.song.title }}</div>
+                            <div class="song-artist">{{ like.song.artist }}</div>
+                        </div>
+                        <a href="{% url 'toggle_like' like.song.id %}" class="unlike-btn">Unlike</a>
                     </div>
-                    <a href="{% url 'toggle_like' like.song.id %}" class="unlike-btn">Unlike</a>
+                    <audio controls data-song-id="{{ like.song.id }}" preload="metadata" style="width:100%;">
+                        <source src="{{ like.song.audio_file.url }}">
+                        Your browser does not support the audio element.
+                    </audio>
                 </li>
             {% empty %}
                 <p class="empty-msg">Abhi tak koi song like nahi kiya.</p>

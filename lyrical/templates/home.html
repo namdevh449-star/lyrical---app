@@ -206,8 +206,8 @@
                 <li class="song-card">
     <div class="song-title">{{ song.title }}</div>
     <div class="song-artist">{{ song.artist }}</div>
-    <audio controls data-song-id="{{ song.id }}">
-        <source src="{{ song.audio_file.url }}" type="video/mp4">
+    <audio controls data-song-id="{{ song.id }}" preload="metadata">
+        <source src="{{ song.audio_file.url }}">
         Your browser does not support the audio element.
     </audio>
     <a href="{% url 'toggle_like' song.id %}" style="color:#1db954; font-size:13px; text-decoration:none; display:inline-block; margin-top:8px;">Like</a>

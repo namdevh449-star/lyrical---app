@@ -53,12 +53,18 @@
 
         <h2>Songs in this playlist</h2>
         {% for song in playlist.songs.all %}
-            <div class="song-card">
-                <div class="song-info">{{ song.title }} — <span>{{ song.artist }}</span></div>
-                <form method="POST" action="{% url 'remove_song' playlist.id song.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="remove-btn">Remove</button>
-                </form>
+            <div class="song-card" style="flex-direction:column; align-items:flex-start; gap:10px;">
+                <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+                    <div class="song-info">{{ song.title }} — <span>{{ song.artist }}</span></div>
+                    <form method="POST" action="{% url 'remove_song' playlist.id song.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="remove-btn">Remove</button>
+                    </form>
+                </div>
+                <audio controls data-song-id="{{ song.id }}" preload="metadata" style="width:100%;">
+                    <source src="{{ song.audio_file.url }}">
+                    Your browser does not support the audio element.
+                </audio>
             </div>
         {% empty %}
             <p class="empty-msg">Is playlist mein abhi koi song nahi hai.</p>
