@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up — Lyrical{% endblock %}
+
+{% block content %}
+<div class="form-card">
+  <div style="text-align: center; margin-bottom: 24px;">
+    <div class="logo-icon" style="margin: 0 auto 12px; width: 48px; height: 48px; font-size: 1.4rem;">
+      <i class="fa-solid fa-music"></i>
+    </div>
+    <h2 style="font-size: 1.8rem; font-weight: 800;">Create Account</h2>
+    <p style="color: var(--text-muted); font-size: 0.9rem;">Join Lyrical to experience time-synced lyrics, playlists, and analytics.</p>
+  </div>
+
+  <form method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input type="text" name="username" class="form-input" placeholder="Choose a username" required>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" name="password" class="form-input" placeholder="Choose a strong password" required>
+    </div>
+
+    <button type="submit" class="btn-primary" style="width: 100%; margin-top: 10px;">
+      <i class="fa-solid fa-user-plus"></i> Create Account
+    </button>
+  </form>
+
+  <div style="text-align: center; margin-top: 20px; font-size: 0.9rem; color: var(--text-muted);">
+    Already have an account? <a href="{% url 'login' %}" style="color: var(--accent-cyan); font-weight: 700; text-decoration: none;">Login</a>
+  </div>
+</div>
+{% endblock %}

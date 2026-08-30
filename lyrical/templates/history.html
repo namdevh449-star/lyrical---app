@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Recently Played — Lyrical Studio{% endblock %}
+
+{% block content %}
+<div class="glass-panel">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+    <div>
+      <h1 style="font-size: 2.2rem; font-weight: 800;"><i class="fa-solid fa-clock-rotate-left" style="color: var(--accent-cyan);"></i> Recently <span class="gradient-text">Played</span></h1>
+      <p style="color: var(--text-muted);">Timeline history of tracks played in your session.</p>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 14px;">
+    {% for entry in history %}
+      <div class="django-song-card" style="margin-bottom: 0;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--grad-primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #000;">
+              <i class="fa-solid fa-play"></i>
+            </div>
+            <div>
+              <div style="font-size: 1.1rem; font-weight: 700;">{{ entry.song.title }}</div>
+              <div style="color: var(--accent-cyan); font-size: 0.88rem;">{{ entry.song.artist }}</div>
+            </div>
+          </div>
+
+          <span class="song-meta-badge"><i class="fa-regular fa-clock"></i> {{ entry.played_at|timesince }} ago</span>
+        </div>
+      </div>
+    {% empty %}
+      <div style="padding: 40px; text-align: center; color: var(--text-muted); background: rgba(255,255,255,0.02); border-radius: var(--radius-md);">
+        <i class="fa-solid fa-clock" style="font-size: 2.5rem; color: var(--accent-cyan); margin-bottom: 12px;"></i>
+        <p>Abhi tak koi song play nahi kiya.</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

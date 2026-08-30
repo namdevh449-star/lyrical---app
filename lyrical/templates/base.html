@@ -1,0 +1,83 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Lyrical — Feel Every Word{% endblock %}</title>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js for Analytics -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Noto+Nastaliq+Urdu:wght@400;700&family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Master Stylesheet -->
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Ambient Glowing Background Orbs -->
+  <div class="bg-glow-container">
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container nav-container">
+      <a href="{% url 'home' %}" class="brand-logo">
+        <div class="logo-icon"><i class="fa-solid fa-music"></i></div>
+        <span>Lyrical<span class="gradient-text">.app</span></span>
+      </a>
+
+      <!-- Global Search Bar -->
+      <form method="GET" action="{% url 'home' %}" class="nav-search-form">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" name="q" class="nav-search-input" placeholder="Search songs, artists, mood..." value="{{ query|default:'' }}">
+      </form>
+
+      <!-- Navigation Links -->
+      <ul class="nav-links">
+        <li><a href="{% url 'home' %}" class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}"><i class="fa-solid fa-house"></i> Home</a></li>
+        <li><a href="{% url 'playlists' %}" class="nav-link {% if request.resolver_match.url_name == 'playlists' %}active{% endif %}"><i class="fa-solid fa-list-ul"></i> Playlists</a></li>
+        <li><a href="{% url 'library' %}" class="nav-link {% if request.resolver_match.url_name == 'library' %}active{% endif %}"><i class="fa-solid fa-heart"></i> Library</a></li>
+        <li><a href="{% url 'history' %}" class="nav-link {% if request.resolver_match.url_name == 'history' %}active{% endif %}"><i class="fa-solid fa-clock-rotate-left"></i> History</a></li>
+        <li><a href="{% url 'analytics' %}" class="nav-link {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}"><i class="fa-solid fa-chart-pie"></i> Analytics</a></li>
+        <li><a href="{% url 'lyrics_timer' %}" class="nav-link {% if request.resolver_match.url_name == 'lyrics_timer' %}active{% endif %}"><i class="fa-solid fa-stopwatch"></i> Karaoke</a></li>
+      </ul>
+
+      <!-- User Auth State -->
+      <div class="user-auth-box">
+        {% if user.is_authenticated %}
+          <span class="user-name-tag"><i class="fa-solid fa-user-circle" style="color: var(--accent-cyan);"></i> {{ user.username }}</span>
+          <a href="{% url 'logout' %}" class="btn-glass"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+        {% else %}
+          <a href="{% url 'login' %}" class="btn-glass">Login</a>
+          <a href="{% url 'signup' %}" class="btn-primary">Sign Up</a>
+        {% endif %}
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Body Content Block -->
+  <main class="container">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert-box"><i class="fa-solid fa-circle-info"></i> {{ message }}</div>
+      {% endfor %}
+    {% endif %}
+
+    {% block content %}
+    {% endblock %}
+  </main>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

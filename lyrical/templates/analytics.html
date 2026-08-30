@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Analytics Dashboard — Lyrical Studio{% endblock %}
+
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px;">
+  <div>
+    <h1 style="font-size: 2.4rem; font-weight: 800;"><i class="fa-solid fa-chart-line" style="color: var(--accent-cyan);"></i> Analytics <span class="gradient-text">Dashboard</span></h1>
+    <p style="color: var(--text-muted);">Real-time listening stats, play counts, mood insights, and top performers.</p>
+  </div>
+
+  <a href="{% url 'export_analytics_csv' %}" class="btn-primary">
+    <i class="fa-solid fa-file-csv"></i> Export Analytics CSV
+  </a>
+</div>
+
+<!-- Stats Summary Row -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 32px;">
+  <div class="glass-panel" style="padding: 24px; text-align: center; margin-bottom: 0;">
+    <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">Total Tracks</div>
+    <div style="font-size: 2.2rem; font-weight: 900;" class="gradient-text">{{ total_songs }}</div>
+  </div>
+
+  <div class="glass-panel" style="padding: 24px; text-align: center; margin-bottom: 0;">
+    <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">Total Play Count</div>
+    <div style="font-size: 2.2rem; font-weight: 900;" class="gradient-text-neon">{{ total_plays }}</div>
+  </div>
+
+  <div class="glass-panel" style="padding: 24px; text-align: center; margin-bottom: 0;">
+    <div style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; margin-bottom: 6px;">Your Playlists</div>
+    <div style="font-size: 2.2rem; font-weight: 900;" class="gradient-text">{{ total_playlists }}</div>
+  </div>
+</div>
+
+<!-- Charts Grid -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 28px; margin-bottom: 40px;">
+  
+  <!-- Song Plays Bar Chart -->
+  <div class="glass-panel" style="margin-bottom: 0;">
+    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 16px;"><i class="fa-solid fa-chart-bar" style="color: var(--accent-cyan);"></i> Top Songs Play Count</h3>
+    <div style="height: 260px; position: relative;">
+      <canvas id="songsChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Mood Distribution Pie Chart -->
+  <div class="glass-panel" style="margin-bottom: 0;">
+    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 16px;"><i class="fa-solid fa-face-smile" style="color: var(--accent-pink);"></i> Mood Distribution</h3>
+    <div style="height: 260px; position: relative;">
+      <canvas id="moodChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Artists Play Count Chart -->
+  <div class="glass-panel" style="margin-bottom: 0;">
+    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 16px;"><i class="fa-solid fa-users-viewfinder" style="color: var(--accent-purple);"></i> Artist Shares</h3>
+    <div style="height: 260px; position: relative;">
+      <canvas id="artistsChart"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- Data Tables Grid -->
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px;">
+  
+  <div class="glass-panel">
+    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;"><i class="fa-solid fa-trophy" style="color: #ffd700;"></i> Top 10 Tracks</h3>
+    <ul style="list-style: none;">
+      {% for song in top_songs %}
+        <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+          <div>
+            <div style="font-weight: 700;">{{ song.title }}</div>
+            <div style="font-size: 0.82rem; color: var(--text-muted);">{{ song.artist }}</div>
+          </div>
+          <span class="song-meta-badge">{{ song.play_count }} plays</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <div class="glass-panel">
+    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 16px;"><i class="fa-solid fa-star" style="color: var(--accent-cyan);"></i> Top 10 Artists</h3>
+    <ul style="list-style: none;">
+      {% for artist in top_artists %}
+        <li style="display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+          <div style="font-weight: 700;">{{ artist.artist }}</div>
+          <span class="song-meta-badge">{{ artist.total_plays }} plays</span>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Top Songs Bar Chart
+  const songLabels = [{% for song in top_songs %}"{{ song.title }}",{% endfor %}];
+  const songData = [{% for song in top_songs %}{{ song.play_count }},{% endfor %}];
+
+  new Chart(document.getElementById('songsChart'), {
+    type: 'bar',
+    data: {
+      labels: songLabels,
+      datasets: [{
+        label: 'Plays',
+        data: songData,
+        backgroundColor: '#00f2fe',
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: '#94A3B8' } },
+        y: { ticks: { color: '#94A3B8' } }
+      }
+    }
+  });
+
+  // Top Artists Doughnut Chart
+  const artistLabels = [{% for artist in top_artists %}"{{ artist.artist }}",{% endfor %}];
+  const artistData = [{% for artist in top_artists %}{{ artist.total_plays }},{% endfor %}];
+
+  new Chart(document.getElementById('artistsChart'), {
+    type: 'doughnut',
+    data: {
+      labels: artistLabels,
+      datasets: [{
+        data: artistData,
+        backgroundColor: ['#00f2fe', '#4facfe', '#7f00ff', '#ff0844', '#ffd700', '#1db954']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8' } } }
+    }
+  });
+
+  // Mood Distribution Pie Chart
+  const moodLabels = [{% for m in mood_data %}"{{ m.mood }}",{% endfor %}];
+  const moodCounts = [{% for m in mood_data %}{{ m.count }},{% endfor %}];
+
+  new Chart(document.getElementById('moodChart'), {
+    type: 'pie',
+    data: {
+      labels: moodLabels,
+      datasets: [{
+        data: moodCounts,
+        backgroundColor: ['#1db954', '#ff0844', '#00f2fe', '#ffd700', '#7f00ff', '#4facfe']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { color: '#94A3B8' } } }
+    }
+  });
+</script>
+{% endblock %}

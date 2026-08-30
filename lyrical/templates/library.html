@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Your Library — Lyrical Studio{% endblock %}
+
+{% block content %}
+<div class="glass-panel">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+    <div>
+      <h1 style="font-size: 2.2rem; font-weight: 800;"><i class="fa-solid fa-heart" style="color: var(--accent-pink);"></i> Your <span class="gradient-text">Library</span></h1>
+      <p style="color: var(--text-muted);">Your liked tracks and saved custom playlists in one place.</p>
+    </div>
+  </div>
+
+  <!-- Liked Songs Section -->
+  <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 16px;"><i class="fa-solid fa-heart-pulse" style="color: var(--accent-pink);"></i> Liked Songs</h2>
+  <div class="song-grid-container" style="margin-bottom: 40px;">
+    {% for like in liked_songs %}
+      <div class="django-song-card">
+        <div>
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px;">
+            <div>
+              <div class="song-card-title">{{ like.song.title }}</div>
+              <div class="song-card-artist">{{ like.song.artist }}</div>
+            </div>
+            <a href="{% url 'toggle_like' like.song.id %}" class="btn-danger"><i class="fa-solid fa-heart-crack"></i> Unlike</a>
+          </div>
+
+          {% if like.song.audio_file %}
+            <audio controls class="django-audio-player" data-song-id="{{ like.song.id }}" preload="metadata">
+              <source src="{{ like.song.audio_file.url }}">
+              Your browser does not support the audio element.
+            </audio>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <div style="grid-column: 1/-1; padding: 32px; text-align: center; color: var(--text-muted); background: rgba(255,255,255,0.02); border-radius: var(--radius-md);">
+        Abhi tak koi song like nahi kiya. Home page se favorite tracks like karein.
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Your Playlists Section -->
+  <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 16px;"><i class="fa-solid fa-layer-group" style="color: var(--accent-cyan);"></i> Your Playlists</h2>
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px;">
+    {% for playlist in playlists %}
+      <div class="django-song-card" style="margin-bottom: 0;">
+        <div style="font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;">{{ playlist.name }}</div>
+        <a href="{% url 'playlist_detail' playlist.id %}" class="btn-glass" style="width: 100%; text-align: center;">
+          Open Playlist <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    {% empty %}
+      <div style="grid-column: 1/-1; padding: 24px; text-align: center; color: var(--text-muted);">
+        Koi playlist nahi bani abhi tak.
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

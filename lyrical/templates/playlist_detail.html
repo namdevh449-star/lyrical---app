@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ playlist.name }} — Lyrical Playlist{% endblock %}
+
+{% block content %}
+<div class="glass-panel">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+    <div>
+      <a href="{% url 'playlists' %}" style="color: var(--accent-cyan); text-decoration: none; font-size: 0.9rem; font-weight: 600;"><i class="fa-solid fa-arrow-left"></i> Back to Playlists</a>
+      <h1 style="font-size: 2.2rem; font-weight: 800; margin-top: 6px;"><i class="fa-solid fa-compact-disc" style="color: var(--accent-pink);"></i> {{ playlist.name }}</h1>
+      <p style="color: var(--text-muted);">{{ playlist.songs.count }} Tracks in this playlist</p>
+    </div>
+  </div>
+
+  <!-- Songs Currently in Playlist -->
+  <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 16px;"><i class="fa-solid fa-list-check"></i> Songs in this Playlist</h2>
+  <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 36px;">
+    {% for song in playlist.songs.all %}
+      <div class="django-song-card" style="margin-bottom: 0;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;">
+          <div>
+            <div style="font-size: 1.1rem; font-weight: 700;">{{ song.title }}</div>
+            <div style="color: var(--accent-cyan); font-size: 0.88rem;">{{ song.artist }}</div>
+          </div>
+          <form method="POST" action="{% url 'remove_song' playlist.id song.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-danger"><i class="fa-solid fa-trash-can"></i> Remove</button>
+          </form>
+        </div>
+
+        {% if song.audio_file %}
+          <audio controls class="django-audio-player" data-song-id="{{ song.id }}" preload="metadata">
+            <source src="{{ song.audio_file.url }}">
+            Your browser does not support the audio element.
+          </audio>
+        {% endif %}
+      </div>
+    {% empty %}
+      <div style="padding: 24px; text-align: center; color: var(--text-muted); background: rgba(255,255,255,0.02); border-radius: var(--radius-md);">
+        Is playlist mein abhi koi song nahi hai. Niche list se Add karein.
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Add Songs section -->
+  <h2 style="font-size: 1.4rem; font-weight: 700; margin-bottom: 16px;"><i class="fa-solid fa-circle-plus" style="color: var(--accent-cyan);"></i> Add Songs to Playlist</h2>
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+    {% for song in all_songs %}
+      <div class="django-song-card" style="margin-bottom: 0; padding: 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-weight: 700; font-size: 1rem;">{{ song.title }}</div>
+            <div style="color: var(--text-muted); font-size: 0.82rem;">{{ song.artist }}</div>
+          </div>
+          <form method="POST" action="{% url 'add_song' playlist.id song.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn-primary" style="padding: 6px 14px; font-size: 0.8rem;"><i class="fa-solid fa-plus"></i> Add</button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

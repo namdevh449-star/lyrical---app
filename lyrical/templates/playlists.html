@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}My Playlists — Lyrical Studio{% endblock %}
+
+{% block content %}
+<div class="glass-panel">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+    <div>
+      <h1 style="font-size: 2.2rem; font-weight: 800;"><i class="fa-solid fa-list-ul" style="color: var(--accent-cyan);"></i> My <span class="gradient-text">Playlists</span></h1>
+      <p style="color: var(--text-muted);">Organize your favorite synced tracks, Coke Studio sessions, and mood collections.</p>
+    </div>
+  </div>
+
+  <!-- Create Playlist Form -->
+  <form method="POST" action="{% url 'create_playlist' %}" style="display: flex; gap: 12px; margin-bottom: 32px;">
+    {% csrf_token %}
+    <input type="text" name="name" class="form-input" style="flex: 1;" placeholder="Enter new playlist name..." required>
+    <button type="submit" class="btn-primary"><i class="fa-solid fa-plus"></i> Create Playlist</button>
+  </form>
+
+  <!-- Playlists Grid -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
+    {% for playlist in playlists %}
+      <div class="django-song-card" style="margin-bottom: 0;">
+        <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+          <div style="width: 50px; height: 50px; border-radius: var(--radius-md); background: var(--grad-neon); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #fff;">
+            <i class="fa-solid fa-music"></i>
+          </div>
+          <div>
+            <div style="font-size: 1.15rem; font-weight: 700;">{{ playlist.name }}</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted);">{{ playlist.songs.count }} Tracks</div>
+          </div>
+        </div>
+
+        <a href="{% url 'playlist_detail' playlist.id %}" class="btn-glass" style="width: 100%; text-align: center;">
+          Open Playlist <i class="fa-solid fa-arrow-right"></i>
+        </a>
+      </div>
+    {% empty %}
+      <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">
+        <i class="fa-solid fa-folder-open" style="font-size: 2.5rem; color: var(--accent-cyan); margin-bottom: 12px;"></i>
+        <p>Aapne abhi tak koi playlist nahi banayi. Upar Form se new playlist banayein.</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

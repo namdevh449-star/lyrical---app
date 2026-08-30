@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Karaoke Lyrics Timing Studio — Lyrical{% endblock %}
+
+{% block content %}
+<div class="glass-panel">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px;">
+    <div>
+      <h1 style="font-size: 2.2rem; font-weight: 800;"><i class="fa-solid fa-stopwatch" style="color: var(--accent-cyan);"></i> Synced Karaoke <span class="gradient-text">Timing Studio</span></h1>
+      <p style="color: var(--text-muted);">Play any song, tap "Tag Line" in real-time, and generate production LRC synced lyrics.</p>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-glass);">
+      <label class="form-label">1. Select Track</label>
+      <select id="songSelect" class="form-input" style="margin-bottom: 16px;">
+        <option value="">-- Choose Track --</option>
+        {% for song in songs %}
+          <option value="{{ song.audio_file.url }}">{{ song.title }} — {{ song.artist }}</option>
+        {% endfor %}
+      </select>
+
+      <audio id="player" controls class="django-audio-player" style="margin-bottom: 16px;"></audio>
+
+      <label class="form-label">2. Paste Plain Lyrics (One line per row)</label>
+      <textarea id="lyricsInput" class="form-input" style="min-height: 120px; border-radius: 12px; margin-bottom: 16px;" placeholder="Pehli line&#10;Doosri line&#10;Teesri line..."></textarea>
+
+      <button id="startBtn" class="btn-primary"><i class="fa-solid fa-play"></i> Start Tagging Session</button>
+    </div>
+
+    <!-- Tagging Active Box -->
+    <div id="taggingCard" style="display:none; background: rgba(0,242,254,0.06); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--border-glow);">
+      <div style="font-size: 0.85rem; color: var(--accent-cyan); font-weight: 700; margin-bottom: 8px;" id="progressText">Line 1 of 10</div>
+      <div style="font-size: 1.4rem; font-weight: 800; color: #fff; margin-bottom: 20px; min-height: 50px;" id="currentLine">-</div>
+      
+      <div style="display: flex; gap: 12px;">
+        <button id="tagBtn" class="btn-primary" style="flex: 1;"><i class="fa-solid fa-tag"></i> Tag Current Line (or Press Enter)</button>
+        <button id="skipBtn" class="btn-glass"><i class="fa-solid fa-forward"></i> Skip Line</button>
+      </div>
+    </div>
+
+    <!-- Output Box -->
+    <div id="outputCard" style="display:none; background: rgba(0,0,0,0.4); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--border-glass);">
+      <label class="form-label">3. Copy Generated Synced LRC Format</label>
+      <textarea class="form-input" id="outputBox" readonly style="min-height: 180px; font-family: monospace; color: var(--accent-cyan);"></textarea>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const songSelect = document.getElementById('songSelect');
+  const player = document.getElementById('player');
+  const lyricsInput = document.getElementById('lyricsInput');
+  const startBtn = document.getElementById('startBtn');
+  const taggingCard = document.getElementById('taggingCard');
+  const outputCard = document.getElementById('outputCard');
+  const progressText = document.getElementById('progressText');
+  const currentLineBox = document.getElementById('currentLine');
+  const tagBtn = document.getElementById('tagBtn');
+  const skipBtn = document.getElementById('skipBtn');
+  const outputBox = document.getElementById('outputBox');
+
+  let lines = [];
+  let currentIndex = 0;
+  let results = [];
+
+  songSelect.addEventListener('change', function() {
+    if (this.value) {
+      player.src = this.value;
+    }
+  });
+
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = (seconds % 60).toFixed(2);
+    return String(m).padStart(2, '0') + ':' + (s < 10 ? '0' + s : s);
+  }
+
+  function showCurrentLine() {
+    if (currentIndex >= lines.length) {
+      finishTagging();
+      return;
+    }
+    progressText.textContent = `Line ${currentIndex + 1} of ${lines.length}`;
+    currentLineBox.textContent = lines[currentIndex];
+  }
+
+  function tagLine() {
+    if (currentIndex >= lines.length) return;
+    const time = player.currentTime;
+    results.push(`[${formatTime(time)}]${lines[currentIndex]}`);
+    currentIndex++;
+    showCurrentLine();
+  }
+
+  function skipLine() {
+    if (currentIndex >= lines.length) return;
+    currentIndex++;
+    showCurrentLine();
+  }
+
+  function finishTagging() {
+    taggingCard.style.display = 'none';
+    outputCard.style.display = 'block';
+    outputBox.value = results.join('\n');
+  }
+
+  startBtn.addEventListener('click', function() {
+    if (!player.src) {
+      alert('Pehle koi song select karo');
+      return;
+    }
+    const rawLines = lyricsInput.value.trim().split('\n').filter(l => l.trim() !== '');
+    if (rawLines.length === 0) {
+      alert('Lyrics paste karo pehle');
+      return;
+    }
+    lines = rawLines;
+    currentIndex = 0;
+    results = [];
+    taggingCard.style.display = 'block';
+    outputCard.style.display = 'none';
+    showCurrentLine();
+    player.play();
+  });
+
+  tagBtn.addEventListener('click', tagLine);
+  skipBtn.addEventListener('click', skipLine);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && taggingCard.style.display === 'block') {
+      e.preventDefault();
+      tagLine();
+    }
+  });
+</script>
+{% endblock %}
